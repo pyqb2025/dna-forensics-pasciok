@@ -1,14 +1,52 @@
-    name: GitHub Classroom Workflow
+name: Autograding Tests
+on:
+  - push
+  - workflow_dispatch
+  - repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]' && github.actor != 'monga'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      # This is where you place your autograding tests
+      # For more information on this runner, see the documentation at: https://github.com/classroom-resources/autograding-io-grader
+      #
+    - name: Setup python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Run type check
+      uses: classroom-resources/autograding-io-grader@v1
+      id: check-types
+      with:
+          test-name: 'Check types'
+          setup-command: 'if test -e requirements.txt; then pip install -r requirements.txt; fi'
+          command: 'mypy exercise.py'
+          expected-output: 'Success: no issues found in 1 source file'
+          comparison-method: exact
+          max-score: 10
+    - name: Check doctests
+      uses: classroom-resources/autograding-command-grader@v1
+      id: doctests
+      with:
+          test-name: 'Check output'
+          setup-command: 'if test -e requirements.txt; then pip install -r requirements.txt; fi'
+          command: 'python -m doctest -v exercise.py'
+          max-score: 90
 
-    on: [push]
-
-    jobs:
-      build:
-        name: Autograding
-        runs-on: ubuntu-latest
-        steps:
-          - uses: actions/checkout@v3
-          - uses: actions/setup-python@v4
-            with:
-              python-version: '3.10'
-          - uses: education/autograding@v1
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      # For more information on this runner, see the documentation at https://github.com/classroom-resources/autograding-grading-reporter
+      # To output the results of the tests, you can use the
+      # autograding-grading-reporter action like this:
+      env:
+        CHECK-TYPES_RESULTS: "${{ steps.check-types.outputs.result }}"
+        DOCTESTS_RESULTS: "${{ steps.doctests.outputs.result }}"
+      with:
+          runners: check-types,doctests

@@ -1,3 +1,5 @@
+"""A Profiler provides methods to use a DNA string for profiling suspects."""
+
 
 class Profiler:
     """Encapsulate a DNA sequence.
@@ -58,9 +60,11 @@ class Profiler:
         >>> p.longest_run('TATC')
         5
         """
-        pass
+        return -1
 
-    def match_suspect(self, suspect_name: str, dna_fpr: dict[str, int]) -> bool:
+    def match_suspect(self,
+                      suspect_name: str,
+                      dna_fpr: dict[str, int]) -> bool:
         """True if the dna_fpr associated to suspect_name can be found exactly in the DNA sequence. 
 
         >>> p = Profiler('AGACGGGTTACCATGACTATCTATCTATCTATCTATCTATCTATCTATCACGTACGTACGTATCGAGATAGATAGATAGATAGATCCTCGACTTCGATCGCAATGAATGCCAATAGACAAAA')
@@ -70,11 +74,3 @@ class Profiler:
         False
         """
         pass
-
-
-# Do not change anything below
-if __name__ == "__main__":
-    import doctest, sys
-    f_here, _ = doctest.testmod()
-    f_file, _ = doctest.testfile('README.md')
-    sys.exit(f_here + f_file)
